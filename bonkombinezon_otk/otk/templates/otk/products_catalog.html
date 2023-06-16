@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block content %}
+    <h1>{{ title }}</h1>
+<table class="table table-success table-striped">
+    <tr>
+        <th>Штрихкод</th>
+        <th>Категория</th>
+        <th>Наименование</th>
+        <th>Стоимость</th>
+        <th>Редактировать</th>
+    </tr>
+    {% for product in products %}
+    <tr>
+        <td>{{ product.barcode }}</td>
+        <td>{{ product.category }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.category.amount }}</td>
+      <td>
+          <a href="{% url 'edit_product' product.id %}"><i class="fa-regular fa-pen-to-square"></i></a>
+          <a href="{% url 'delete_product' product.id %}"><i class="fa-regular fa-trash-can"></i></a>
+      </td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      <td><a href="{% url 'create_product' %}"><i class="fa-solid fa-square-plus"></i></a></td>
+    </tr>
+</table>
+
+<h2>Группы товаров</h2>
+<table class="table table-success table-striped">
+    <tr>
+        <th>Наименование</th>
+        <th>Стоимость</th>
+        <th>Редактировать</th>
+    </tr>
+    {% for category in categories %}
+    <tr>
+        <td>{{ category.name }}</td>
+        <td>{{ category.amount }}</td>
+      <td>
+          <a href="{% url 'edit_category' category.id %}"><i class="fa-regular fa-pen-to-square"></i></a>
+          <a href="{% url 'delete_category' category.id %}"><i class="fa-regular fa-trash-can"></i></a>
+      </td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td></td>
+        <td></td>
+      <td><a href="{% url 'create_category' %}"><i class="fa-solid fa-square-plus"></i></a></td>
+    </tr>
+</table>
+
+
+<div class="d-grid gap-2 col-sm-12 col-lg-4">
+    <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
+    <a href="{% url 'load_products' %}" class="btn btn-primary">Загрузить из XLS</a>
+</div>
+
+
+{% endblock %}

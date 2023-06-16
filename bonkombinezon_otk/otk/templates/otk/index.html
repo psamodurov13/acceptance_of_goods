@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block content %}
+    <h1>Bonkombinezon - Home page</h1>
+<p>Hi, {{ request.user.username }}</p>
+<a href="{% url 'add_acceptance' %}" class="btn btn-primary">Принять изделие</a>
+
+
+
+
+
+<a href="{% url 'admin_page' %}" class="btn btn-primary">Администратор</a>
+
+
+{% endblock %}

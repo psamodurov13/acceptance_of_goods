@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}Sign in{% endblock %}
+
+
+{% block content %}
+    <h1>Bonkombinezon - login page</h1>
+    {% if request.user.is_authenticated %}
+        <p>Hi, {{ request.user.username }}</p>
+    {% else %}
+    <div class="row">
+        <div class="col-sm-12 col-md-6 p-5">
+            <div class="login-form p-5 border border-dark-subtle">
+                <h2>Войти</h2>
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    {{ login_form|crispy }}
+<!--                  <div class="mb-3">-->
+<!--                    <label for="exampleInputEmail1" class="form-label">Email address</label>-->
+<!--                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">-->
+<!--                  </div>-->
+<!--                  <div class="mb-3">-->
+<!--                    <label for="exampleInputPassword1" class="form-label">Password</label>-->
+<!--                    <input type="password" class="form-control" id="exampleInputPassword1">-->
+<!--                  </div>-->
+                  <button type="submit" class="btn btn-primary" name="login-button">Войти</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-6 p-5">
+            <div class="login-form p-5 border border-dark-subtle">
+                <h2>Зарегистрироваться</h2>
+                <form action="{% url 'register' %}" method="post">
+                    {% csrf_token %}
+                    {{ register_form|crispy }}
+<!--                  <div class="mb-3">-->
+<!--                    <label for="exampleInputEmail2" class="form-label">Email address</label>-->
+<!--                    <input type="email" class="form-control" id="exampleInputEmail2" aria-describedby="emailHelp">-->
+<!--                  </div>-->
+<!--                  <div class="mb-3">-->
+<!--                    <label for="exampleInputPassword2" class="form-label">Password</label>-->
+<!--                    <input type="password" class="form-control" id="exampleInputPassword2">-->
+<!--                  </div>-->
+<!--                  <div class="mb-3">-->
+<!--                    <label for="exampleInputConfirmPassword2" class="form-label">Confirm Password</label>-->
+<!--                    <input type="password" class="form-control" id="exampleInputConfirmPassword2">-->
+<!--                  </div>-->
+                  <button type="submit" class="btn btn-primary" name="register-button">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock %}
