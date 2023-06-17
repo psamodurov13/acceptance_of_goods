@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}Удаление сотрудника{% endblock %}
+
+{% block content %}
+    <h1>Удаление сотрудника</h1>
+<form method="post">
+  {% csrf_token %}
+  <p>Вы действительно хотите удалить "{{ object }}"?</p>
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Да</button>
+</form>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block content %}
+    <h1>{{ title }}</h1>
+<table class="table table-success table-striped">
+    <tr>
+        <th>Штрихкод</th>
+        <th>ФИО</th>
+        <th width="30%">Показать результат по сотруднику</th>
+    </tr>
+    {% for employee in page_obj %}
+    <tr>
+        <td>{{ employee.barcode }}</td>
+        <td>{{ employee.name }}</td>
+      <td>
+          <a href=""><i class="fa-solid fa-square-poll-vertical"></i></a>
+          <a href="{% url 'edit_employee' employee.id %}"><i class="fa-regular fa-pen-to-square"></i></a>
+          <a href="{% url 'delete_employee' employee.id %}"><i class="fa-regular fa-trash-can"></i>
+      </td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td></td>
+        <td></td>
+      <td><a href="{% url 'create_employee' %}"><i class="fa-solid fa-square-plus"></i></a></td>
+    </tr>
+</table>
+
+<nav aria-label="Page navigation example">
+    <ul style="" class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number }}"> < </a></li>
+      {% endif %}
+      {% for page in page_obj.paginator.page_range %}
+        {% if page == page_obj.number %}
+            <li class="page-item active"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+        {% elif page > page_obj.number|add:-3 and page < page_obj.number|add:3 %}
+            <li class="page-item"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}"> > </a></li>
+      {% endif %}
+    </ul>
+</nav>
+
+
+<div class="d-grid gap-2 col-sm-12 col-lg-4">
+    <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
+</div>
+
+
+{% endblock %}

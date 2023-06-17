@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block content %}
+    <h1>{{ title }}</h1>
+<form method="post">
+  {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Фильтр</button>
+</form>
+<table class="table table-success table-striped">
+    <tr>
+        <th>Время</th>
+        <th>Сотрудник</th>
+        <th>Категория</th>
+        <th>Изделие</th>
+        <th>Редактировать</th>
+    </tr>
+    {% for acceptance in acceptances %}
+    <tr>
+        <td>{{ acceptance.acceptance_date }}</td>
+        <td>{{ acceptance.employee }}</td>
+        <td>{{ acceptance.product.category }}</td>
+        <td>{{ acceptance.product }}</td>
+      <td>
+          <a href="{% url 'edit_acceptance' acceptance.id %}"><i class="fa-regular fa-pen-to-square"></i></a>
+          <a href="{% url 'delete_acceptance' acceptance.id %}"><i class="fa-regular fa-trash-can"></i></a>
+      </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<div class="d-grid gap-2 col-sm-12 col-lg-4">
+    <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
+</div>
+
+
+{% endblock %}

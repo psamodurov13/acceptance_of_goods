@@ -17,7 +17,15 @@ urlpatterns = [
     path('edit_product/<int:pk>', views.EditProduct.as_view(), name='edit_product'),
     path('delete_product/<int:pk>', views.DeleteProduct.as_view(), name='delete_product'),
     path('load_products', views.load_products, name='load_products'),
-    # path('load_products_form', views.load_products_form, name='load_products_form')
+    path('employees_catalog', views.employees_catalog, name='employees_catalog'),
+    path('create_employee', views.CreateEmployee.as_view(), name='create_employee'),
+    path('edit_employee/<int:pk>', views.EditEmployee.as_view(), name='edit_employee'),
+    path('delete_employee/<int:pk>', views.DeleteEmployee.as_view(), name='delete_employee'),
+    path('edit_acceptance/<int:pk>', views.EditAcceptance.as_view(), name='edit_acceptance'),
+    path('delete_acceptance/<int:pk>', views.DeleteAcceptance.as_view(), name='delete_acceptance'),
+    path('acceptance_list', views.acceptance_list, name='acceptance_list'),
+    # path('create_acceptance', views.create_acceptance, name="create_acceptance"),
+
 
     # path('categories/<int:pk>'), views.
 

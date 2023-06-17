@@ -4,8 +4,10 @@ class CustomStr:
             return self.title
         elif hasattr(self, 'name'):
             return self.name
+        elif hasattr(self, 'employee') and hasattr(self, 'product'):
+            return f'{self.employee} {self.product}'
         else:
-            return self
+            return self.id
 
 
 def safe_get(Model, **kwargs):

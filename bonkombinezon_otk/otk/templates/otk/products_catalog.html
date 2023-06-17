@@ -15,7 +15,7 @@
         <th>Стоимость</th>
         <th>Редактировать</th>
     </tr>
-    {% for product in products %}
+    {% for product in page_obj %}
     <tr>
         <td>{{ product.barcode }}</td>
         <td>{{ product.category }}</td>
@@ -35,6 +35,24 @@
       <td><a href="{% url 'create_product' %}"><i class="fa-solid fa-square-plus"></i></a></td>
     </tr>
 </table>
+
+<nav aria-label="Page navigation example">
+    <ul style="" class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number }}"> < </a></li>
+      {% endif %}
+      {% for page in page_obj.paginator.page_range %}
+        {% if page == page_obj.number %}
+            <li class="page-item active"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+        {% elif page > page_obj.number|add:-3 and page < page_obj.number|add:3 %}
+            <li class="page-item"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}"> > </a></li>
+      {% endif %}
+    </ul>
+</nav>
 
 <h2>Группы товаров</h2>
 <table class="table table-success table-striped">
