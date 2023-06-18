@@ -31,6 +31,7 @@ class CreateAcceptanceForm(forms.Form):
 
 class AcceptanceFilterForm(forms.Form):
     employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
-                                 required=False, widget=forms.CheckboxSelectMultiple())
+                                 required=False, widget=forms.CheckboxSelectMultiple(),
+                                         initial=[c.pk for c in Employees.objects.all()])
     start_date = forms.DateField(label='От')
     end_date = forms.DateField(label='До')

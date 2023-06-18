@@ -7,8 +7,7 @@
 
 {% block content %}
     <h1>{{ title }}</h1>
-<form method="post">
-  {% csrf_token %}
+<form method="get">
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary">Фильтр</button>
 </form>
@@ -37,6 +36,7 @@
 
 <div class="d-grid gap-2 col-sm-12 col-lg-4">
     <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
+    <a href="{% url 'download_acceptances' %}?{{ request.GET.urlencode }}" class="btn btn-primary">Выгрузить XLSX</a>
 </div>
 
 

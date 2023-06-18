@@ -16,6 +16,9 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 import openpyxl
 from bonkombinezon_otk.utils import *
 from datetime import datetime, timedelta
+from excel_response import ExcelResponse
+import pytz
+our_timezone = pytz.timezone('Europe/Istanbul')
 
 
 @login_required
@@ -112,9 +115,9 @@ def acceptance_list(request):
     context = {
         'title': 'Редактировать данные внесенные ранее'
     }
-    if request.method == 'POST':
-        form = AcceptanceFilterForm(request.POST)
-        logger.info(f'REQUEST POST DATA - {request.POST}')
+    if request.GET:
+        form = AcceptanceFilterForm(request.GET)
+        logger.info(f'REQUEST DATA - {request.GET}')
         if form.is_valid():
             form_data = form.cleaned_data
             logger.info(f'ACCEPTANCE LIST FORM DATA - {form_data}')
@@ -132,9 +135,17 @@ def acceptance_list(request):
             logger.info(f'ERRORS - {form.errors}')
             acceptances = None
     else:
-        form = AcceptanceFilterForm()
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
+        employees = Employees.objects.all()
+        form = AcceptanceFilterForm(
+            initial={
+                'start_date': start_date,
+                'end_date': end_date,
+                'employees': employees
+            }
+        )
+        logger.info(f'FIRST form - {form.data}')
         acceptances = Acceptance.objects.filter(acceptance_date__range=[start_date, end_date])
         logger.info(f'ALL ACCEPTANCES FOR DATERANGE {start_date} - {end_date} / {acceptances}')
     context['form'] = form
@@ -367,3 +378,25 @@ class DeleteAcceptance(CustomStr, DeleteView):
         self.object.delete()
         messages.success(self.request, 'Приемка удалена')
         return HttpResponseRedirect(success_url)
+
+
+def download_acceptances(request):
+    logger.info(f'STARTING DOWNLOAD ACCEPTANCES - {request.GET} / {request.GET.urlencode}')
+    if request.GET:
+        employees = request.GET.getlist('employee')
+        start_date = datetime.strptime(request.GET['start_date'], '%d.%m.%Y')
+        end_date = datetime.strptime(request.GET['end_date'], '%d.%m.%Y')
+    else:
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=14)
+        employees = Employees.objects.all()
+    logger.info(f'EMP - {employees}, SD - {start_date}, ED - {end_date}')
+    result_queryset = Acceptance.objects.filter(
+        acceptance_date__range=[start_date, end_date],
+        employee_id__in=employees
+    )
+    logger.info(f'QS - {result_queryset}')
+    data = [['Время', 'Сотрудник', 'Категория', 'Изделие']] + \
+           [[i.acceptance_date.astimezone(our_timezone).strftime('%d.%m.%Y %H:%M'), i.employee.name, i.product.category.name, i.product.name] for i in result_queryset]
+    logger.info(f'DATA - {data}')
+    return ExcelResponse(data, 'Results')
