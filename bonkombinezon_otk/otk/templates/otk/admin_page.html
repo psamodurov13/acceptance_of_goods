@@ -9,7 +9,7 @@
     <h1>{{ title }}</h1>
 <div class="d-grid gap-2 col-sm-12 col-lg-4">
     <a href="{% url 'employees_catalog' %}" class="btn btn-primary">Текущие сотрудники</a>
-    <a href="" class="btn btn-primary">Вывести отчет за период по сотрудникам</a>
+    <a href="{% url 'report' %}" class="btn btn-primary">Вывести отчет за период по сотрудникам</a>
     <a href="{% url 'products_catalog' %}" class="btn btn-primary">Редактировать номенклатуру</a>
     <a href="{% url 'acceptance_list' %}" class="btn btn-primary">Редактировать данные внесенные ранее</a>
     <a href="" class="btn btn-primary">Настройка автовыгрузки</a>

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
-from .forms import UserRegisterForm, UserLoginForm, LoadProductsForm, CreateAcceptanceForm, AcceptanceFilterForm
+from .forms import *
 from django.contrib.auth import login, logout
 from .models import *
 from django.contrib.auth.decorators import login_required
@@ -151,6 +151,102 @@ def acceptance_list(request):
     context['form'] = form
     context['acceptances'] = acceptances
     return render(request, 'otk/acceptance_list.html', context)
+
+
+def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datetime.today(),
+                employees=Employees.objects.all(),
+                all_products=None):
+    logger.info(f'FUNCTION GET_RESULTS IS STARTED')
+    categories = ProductCategories.objects.all()
+    head_row = ['Сотрудник'] + [i.name for i in categories] + ['Сумма за период']
+    final_row = ['Итого'] + [0] * len(categories) + [0]
+    logger.info(f'FINAL ROW {final_row}')
+    logger.info(f'HEAD ROW ')
+    if not all_products:
+        all_products = Products.objects.all()
+    results = []
+    for employee in employees:
+        logger.info('-' * 10)
+        logger.info(f'START FORM DATA FOR {employee.name}')
+        result = [employee.name]
+        total = 0
+        for category in categories:
+            products = all_products.filter(
+                category=category
+            )
+            logger.info(f'ALL PRODUCTS OF CATEGORY {category} - {products}')
+            acceptances = Acceptance.objects.filter(
+                product__in=products,
+                employee=employee,
+                acceptance_date__range=[start_date, end_date]
+            )
+            logger.info(f'ALL ACCEPTANCES OF CATEGORY {category} - {acceptances}')
+            counts = acceptances.count()
+            result.append(counts)
+            logger.info(f'RESULT - {result}')
+            total += counts * category.amount
+            logger.info(f'CURRENT TOTAL - {counts * category.amount}')
+        result.append(total)
+        results.append(result)
+        for index, value in enumerate(result[1:], start=1):
+            logger.info(f'value - {value}')
+            logger.info(f'final_row[index] - {final_row[index]}')
+            final_row[index] += value
+        logger.info(f'CURRENT FINAL ROW - {final_row}')
+
+    logger.info(f'RESULTS - {results}')
+    logger.info(f'ALL ACCEPTANCES FOR DATERANGE {start_date} - {end_date} / {acceptances}')
+    return head_row, results, final_row
+
+
+def report(request):
+    context = {
+        'title': 'Отчет за период (Ведомость)'
+    }
+    if request.GET:
+        form = ReportFilterForm(request.GET)
+        logger.info(f'REQUEST DATA - {request.GET}')
+        if form.is_valid():
+            form_data = form.cleaned_data
+            for i in form_data['products']:
+                if i.startswith('category'):
+                    form_data['products'].remove(i)
+            logger.info(f'ACCEPTANCE LIST FORM DATA - {form_data}')
+            employees = Employees.objects.filter(id__in=form_data['employee'])
+            logger.info(f'EMPLOYEES - {employees}')
+            start_date = form_data['start_date']
+            end_date = form_data['end_date']
+            # acceptances = Acceptance.objects.filter(acceptance_date__range=[start_date, end_date],
+            #                                         employee__in=employees)
+            products = Products.objects.filter(id__in=form_data['products'])
+            logger.info(f'PRODUCTS {len(products)} - {employees}')
+            # logger.info(f'FILTRED ACCEPTANCES {start_date} - {end_date} / {acceptances}')
+        else:
+            form_data = form.cleaned_data
+            logger.info(f'INVALID FORM')
+            logger.info(f'ACCEPTANCE LIST FORM DATA - {form_data}')
+            logger.info(f'ERRORS - {form.errors}')
+            acceptances = None
+            return render(request, 'otk/report.html', context)
+    else:
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=14)
+        employees = Employees.objects.all()
+        form = ReportFilterForm(
+            initial={
+                'start_date': start_date,
+                'end_date': end_date,
+                'employees': employees,
+                # 'products': products
+            }
+        )
+        # logger.info(f'FIRST form - {form.data}')
+    head_row, results, final_row = get_results(start_date, end_date, employees)
+    context['form'] = form
+    context['head_row'] = head_row
+    context['results'] = results
+    context['final_row'] = final_row
+    return render(request, 'otk/report.html', context)
 
 
 # class CreateAcceptance(CustomStr, CreateView):
@@ -399,4 +495,22 @@ def download_acceptances(request):
     data = [['Время', 'Сотрудник', 'Категория', 'Изделие']] + \
            [[i.acceptance_date.astimezone(our_timezone).strftime('%d.%m.%Y %H:%M'), i.employee.name, i.product.category.name, i.product.name] for i in result_queryset]
     logger.info(f'DATA - {data}')
-    return ExcelResponse(data, 'Results')
+    return ExcelResponse(data, 'Results acceptances')
+
+
+def download_report(request):
+    logger.info(f'STARTING DOWNLOAD REPORT - {request.GET} / {request.GET.urlencode}')
+    if request.GET:
+        employees = Employees.objects.filter(id__in=request.GET.getlist('employee'))
+        logger.info(f'EMPLOYEES - {employees}')
+        start_date = datetime.strptime(request.GET['start_date'], '%d.%m.%Y')
+        end_date = datetime.strptime(request.GET['end_date'], '%d.%m.%Y')
+    else:
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=14)
+        employees = Employees.objects.all()
+    head_row, results, final_row = get_results(start_date, end_date, employees)
+    logger.info(f'EMP - {employees}, SD - {start_date}, ED - {end_date}')
+    data = [head_row] + results + [final_row]
+    logger.info(f'DATA - {data}')
+    return ExcelResponse(data, 'Results report')

@@ -15,3 +15,7 @@ margin-top: 56px;
 --bs-alert-border-color: #f1aeb5;
 --bs-alert-link-color: #b02a37;
 }
+#div_id_products > div {
+     max-height: 125px;
+     overflow: scroll;
+}

@@ -25,6 +25,8 @@ urlpatterns = [
     path('delete_acceptance/<int:pk>', views.DeleteAcceptance.as_view(), name='delete_acceptance'),
     path('acceptance_list', views.acceptance_list, name='acceptance_list'),
     path('download_acceptances', views.download_acceptances, name='download_acceptances'),
+    path('report', views.report, name='report'),
+    path('download_report', views.download_report, name='download_report'),
     # path('create_acceptance', views.create_acceptance, name="create_acceptance"),
 
 

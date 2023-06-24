@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block content %}
+    <h1>{{ title }}</h1>
+<form method="get">
+    {{ form.employee|as_crispy_field }}
+    {{ form.start_date|as_crispy_field }}
+    {{ form.end_date|as_crispy_field }}
+    {{ form.products|as_crispy_field }}
+    <script>
+        const productsField = document.querySelectorAll('#div_id_products > div .form-check')
+        console.log(productsField)
+        productsField.forEach(function(elem) {
+            console.log(`${elem.innerText} ${elem.children[0].value}`)
+            console.log(elem.children[0].value.includes('category'))
+        })
+
+    </script>
+    {% comment %}
+    <div id="div_id_products" class="mb-3">
+        <label class="form-label">
+            Товары
+        </label>
+        <div>
+            {% for item in form.products %}
+            <div class="form-check">
+                {{item}}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endcomment %}
+
+
+
+    <button type="submit" class="btn btn-primary">Фильтр</button>
+</form>
+<table class="table table-success table-striped">
+    <tr>
+        {% for cell in head_row %}
+        <th>{{ cell }}</th>
+        {% endfor %}
+    </tr>
+    {% for result in results %}
+    <tr>
+        {% for cell in result%}
+        <td>{{ cell }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    <tr>
+        {% for cell in final_row %}
+        <td>{{ cell }}</td>
+        {% endfor %}
+    </tr>
+</table>
+
+<div class="d-grid gap-2 col-sm-12 col-lg-4">
+    <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
+    <a href="{% url 'download_report' %}?{{ request.GET.urlencode }}" class="btn btn-primary">Выгрузить XLSX</a>
+</div>
+
+{% endblock %}

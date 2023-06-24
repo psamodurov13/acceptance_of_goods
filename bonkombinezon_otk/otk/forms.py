@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import *
+from bonkombinezon_otk.settings import logger
 
 
 class UserRegisterForm(UserCreationForm):
@@ -35,3 +36,23 @@ class AcceptanceFilterForm(forms.Form):
                                          initial=[c.pk for c in Employees.objects.all()])
     start_date = forms.DateField(label='От')
     end_date = forms.DateField(label='До')
+
+
+class ReportFilterForm(forms.Form):
+    choices = []
+    for category in ProductCategories.objects.all().order_by('id'):
+        choices.append((f'category_{category.pk}', category.name))
+        logger.info(f'CATEGORY - {category.name}')
+        for product in Products.objects.filter(category=category).order_by('name'):
+            choices.append((product.pk, product.name))
+            logger.info(f'---PRODUCT - {product.name}')
+    logger.info(f'CHOICES - {choices}')
+
+    employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
+                                 required=False, widget=forms.CheckboxSelectMultiple(),
+                                         initial=[c.pk for c in Employees.objects.all()])
+    start_date = forms.DateField(label='От')
+    end_date = forms.DateField(label='До')
+    products = forms.MultipleChoiceField(label='Товары', choices=choices,
+                                 required=False, widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom'}),
+                                         initial=[c[0] for c in choices])
