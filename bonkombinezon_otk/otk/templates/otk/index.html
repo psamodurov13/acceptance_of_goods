@@ -11,6 +11,22 @@
 <a href="{% url 'add_acceptance' %}" class="btn btn-primary">Принять изделие</a>
 
 
+<table class="table table-success table-striped">
+    <tr>
+        {% for cell in head_row %}
+        <th>{{cell}}</th>
+        {% endfor %}
+    </tr>
+    {% for result in results %}
+    <tr>
+        {% for cell in result %}
+        <td>{{ cell }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
+
 
 
 

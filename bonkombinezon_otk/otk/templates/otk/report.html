@@ -13,13 +13,75 @@
     {{ form.end_date|as_crispy_field }}
     {{ form.products|as_crispy_field }}
     <script>
+        const checkboxes = document.getElementsByName('products')
+        function disableAll() {
+            checkboxes.forEach(function(checkbox) {
+                    checkbox.checked = false
+                }
+            )
+        }
+        function enableAll() {
+            checkboxes.forEach(function(checkbox) {
+                    checkbox.checked = true
+                }
+            )
+        }
+    </script>
+
+    <div>
+        <span>
+            <button onclick="disableAll()" type="button" class="btn btn-link">Снять все</button>
+        </span>
+        <span>
+            <button onclick="enableAll()" type="button" class="btn btn-link">Выделить все</button>
+        </span>
+    </div>
+
+    <script>
         const productsField = document.querySelectorAll('#div_id_products > div .form-check')
-        console.log(productsField)
         productsField.forEach(function(elem) {
-            console.log(`${elem.innerText} ${elem.children[0].value}`)
-            console.log(elem.children[0].value.includes('category'))
+            if (elem.children[0].value.includes('category')) {
+                elem.classList.add('product-category-checkbox')
+                elem.querySelector('input').classList.add('form-check-input-category')
+            } else {
+                elem.classList.add('product-checkbox')
+                elem.querySelector('input').classList.add('form-check-input-product')
+            }
         })
 
+        const categoryCheckboxes = document.querySelectorAll('.product-category-checkbox')
+        console.log('CATEGORY CHECKBOXES')
+        console.log(categoryCheckboxes)
+        console.log(categoryCheckboxes[0].querySelector('input').className.includes('form-check-input-category'))
+
+        categoryCheckboxes.forEach(function(elem) {
+            elem.addEventListener('click', () => {
+                console.log('Click on')
+                console.log(elem.querySelector('input').value)
+                const category_input = elem.querySelector('input')
+                const all_checkboxes = document.querySelectorAll('#div_id_products > div .form-check input')
+                if (!category_input.checked) {
+                    console.log('Now disabled')
+                } else {
+                    console.log('Now enabled')
+                }
+                let change_status = false
+                let checkbox_status;
+                all_checkboxes.forEach(function(checkbox) {
+                    if (checkbox.className.includes('form-check-input-category') && checkbox.value !== category_input.value) {
+                            change_status = false
+                        }
+                    if (checkbox.value === category_input.value) {
+                        checkbox_status = checkbox.checked
+                        change_status = true
+                    }
+                    if (change_status) {
+                        checkbox.checked = checkbox_status
+                    }
+                })
+
+            })
+        })
     </script>
     {% comment %}
     <div id="div_id_products" class="mb-3">

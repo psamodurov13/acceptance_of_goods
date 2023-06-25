@@ -1,3 +1,5 @@
+import time
+
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
@@ -21,11 +23,81 @@ import pytz
 our_timezone = pytz.timezone('Europe/Istanbul')
 
 
+def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datetime.today(),
+                employees=Employees.objects.all(),
+                all_products=None):
+    logger.info(f'FUNCTION GET_RESULTS IS STARTED')
+    categories = ProductCategories.objects.all()
+    head_row = ['Сотрудник'] + [i.name for i in categories] + ['Сумма за период']
+    final_row = ['Итого'] + [0] * len(categories) + [0]
+    logger.info(f'FINAL ROW {final_row}')
+    logger.info(f'HEAD ROW ')
+    if not all_products:
+        all_products = Products.objects.all()
+    results = []
+    for employee in employees:
+        logger.info('-' * 10)
+        logger.info(f'START FORM DATA FOR {employee.name}')
+        result = [employee.name]
+        total = 0
+        for category in categories:
+            products = all_products.filter(
+                category=category
+            )
+            logger.info(f'ALL PRODUCTS OF CATEGORY {category} - {products}')
+            acceptances = Acceptance.objects.filter(
+                product__in=products,
+                employee=employee,
+                acceptance_date__range=[start_date, end_date]
+            )
+            logger.info(f'ALL ACCEPTANCES OF CATEGORY {category} - {acceptances}')
+            counts = acceptances.count()
+            result.append(counts)
+            logger.info(f'RESULT - {result}')
+            total += counts * category.amount
+            logger.info(f'CURRENT TOTAL - {counts * category.amount}')
+        result.append(total)
+        results.append(result)
+        for index, value in enumerate(result[1:], start=1):
+            logger.info(f'value - {value}')
+            logger.info(f'final_row[index] - {final_row[index]}')
+            final_row[index] += value
+        logger.info(f'CURRENT FINAL ROW - {final_row}')
+
+    logger.info(f'RESULTS - {results}')
+    logger.info(f'ALL ACCEPTANCES FOR DATERANGE {start_date} - {end_date} / {acceptances}')
+    return head_row, results, final_row
+
+
 @login_required
 def index(request):
     context = {
         'title': 'Home page'
     }
+    categories = ProductCategories.objects.all()
+    head_row = ['Время', 'Сотрудник'] + [i.name for i in categories]
+    results = []
+    today = datetime(datetime.today().year, datetime.today().month, datetime.today().day)
+    logger.info(f'TODAY - {datetime(today.year, today.month, today.day, tzinfo=our_timezone)}')
+    index = 2
+    for category in categories:
+        logger.info(f'STARTING GET ACCEPTANCES FOR CATEGORY {category}')
+        products = Products.objects.filter(category=category)
+        logger.info(f'PRODUCTS - {products}')
+        acceptances = Acceptance.objects.filter(product__in=products,
+                                                acceptance_date__range=[
+                                                    today, today + timedelta(1)
+                                                ])
+        logger.info(f'ACCEPTANCES - {acceptances}')
+        for acceptance in acceptances:
+            result = [acceptance.acceptance_date, acceptance.employee.name] + [0]*len(categories)
+            result[index] = acceptance.product.name
+            logger.info(f'RESULT WAS ADDED {result}')
+            results.append(result)
+        index += 1
+    results = sorted(results, key=lambda x: x[0], reverse=True)
+    context['head_row'] = head_row
+    context['results'] = results
     return render(request, 'otk/index.html', context)
 
 
@@ -103,6 +175,7 @@ def add_acceptance(request):
             )
             logger.info(f'NEW ACCEPTANCE WAS CREATED - {new_acceptance}')
             messages.success(request, f'Создана новая приемка изделия')
+            return redirect('home')
         else:
             messages.error(request, 'Допущена ошибка. Проверьте форму')
             return render(request, 'otk/add_acceptance.html', context)
@@ -153,50 +226,6 @@ def acceptance_list(request):
     return render(request, 'otk/acceptance_list.html', context)
 
 
-def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datetime.today(),
-                employees=Employees.objects.all(),
-                all_products=None):
-    logger.info(f'FUNCTION GET_RESULTS IS STARTED')
-    categories = ProductCategories.objects.all()
-    head_row = ['Сотрудник'] + [i.name for i in categories] + ['Сумма за период']
-    final_row = ['Итого'] + [0] * len(categories) + [0]
-    logger.info(f'FINAL ROW {final_row}')
-    logger.info(f'HEAD ROW ')
-    if not all_products:
-        all_products = Products.objects.all()
-    results = []
-    for employee in employees:
-        logger.info('-' * 10)
-        logger.info(f'START FORM DATA FOR {employee.name}')
-        result = [employee.name]
-        total = 0
-        for category in categories:
-            products = all_products.filter(
-                category=category
-            )
-            logger.info(f'ALL PRODUCTS OF CATEGORY {category} - {products}')
-            acceptances = Acceptance.objects.filter(
-                product__in=products,
-                employee=employee,
-                acceptance_date__range=[start_date, end_date]
-            )
-            logger.info(f'ALL ACCEPTANCES OF CATEGORY {category} - {acceptances}')
-            counts = acceptances.count()
-            result.append(counts)
-            logger.info(f'RESULT - {result}')
-            total += counts * category.amount
-            logger.info(f'CURRENT TOTAL - {counts * category.amount}')
-        result.append(total)
-        results.append(result)
-        for index, value in enumerate(result[1:], start=1):
-            logger.info(f'value - {value}')
-            logger.info(f'final_row[index] - {final_row[index]}')
-            final_row[index] += value
-        logger.info(f'CURRENT FINAL ROW - {final_row}')
-
-    logger.info(f'RESULTS - {results}')
-    logger.info(f'ALL ACCEPTANCES FOR DATERANGE {start_date} - {end_date} / {acceptances}')
-    return head_row, results, final_row
 
 
 def report(request):
@@ -232,6 +261,7 @@ def report(request):
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
         employees = Employees.objects.all()
+        products = None
         form = ReportFilterForm(
             initial={
                 'start_date': start_date,
@@ -241,7 +271,7 @@ def report(request):
             }
         )
         # logger.info(f'FIRST form - {form.data}')
-    head_row, results, final_row = get_results(start_date, end_date, employees)
+    head_row, results, final_row = get_results(start_date, end_date, employees, products)
     context['form'] = form
     context['head_row'] = head_row
     context['results'] = results
@@ -505,11 +535,13 @@ def download_report(request):
         logger.info(f'EMPLOYEES - {employees}')
         start_date = datetime.strptime(request.GET['start_date'], '%d.%m.%Y')
         end_date = datetime.strptime(request.GET['end_date'], '%d.%m.%Y')
+        products = Products.objects.filter(id__in=request.GET['products'])
     else:
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
         employees = Employees.objects.all()
-    head_row, results, final_row = get_results(start_date, end_date, employees)
+        products = None
+    head_row, results, final_row = get_results(start_date, end_date, employees, products)
     logger.info(f'EMP - {employees}, SD - {start_date}, ED - {end_date}')
     data = [head_row] + results + [final_row]
     logger.info(f'DATA - {data}')

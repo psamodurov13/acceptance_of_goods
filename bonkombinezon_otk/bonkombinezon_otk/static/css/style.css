@@ -19,3 +19,6 @@ margin-top: 56px;
      max-height: 125px;
      overflow: scroll;
 }
+.form-check.product-checkbox {
+    margin-left: 25px;
+}
