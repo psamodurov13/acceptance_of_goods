@@ -15,10 +15,17 @@ margin-top: 56px;
 --bs-alert-border-color: #f1aeb5;
 --bs-alert-link-color: #b02a37;
 }
-#div_id_products > div {
+#div_id_products > div, #div_id_employee > div {
      max-height: 125px;
      overflow: scroll;
 }
 .form-check.product-checkbox {
     margin-left: 25px;
+}
+form.lg-fields input.form-control {
+    height: 4rem;
+    font-size: 2rem;
+}
+form.lg-fields label {
+    font-size: 1.5rem;
 }

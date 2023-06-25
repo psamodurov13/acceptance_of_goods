@@ -6,6 +6,13 @@
 
 
 {% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_page' %}">Страница администратора</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Отчет за период (Ведомость)</li>
+  </ol>
+</nav>
     <h1>{{ title }}</h1>
 <form method="get">
     {{ form.employee|as_crispy_field }}
@@ -102,7 +109,7 @@
 
     <button type="submit" class="btn btn-primary">Фильтр</button>
 </form>
-<table class="table table-success table-striped">
+<table class="table table-success table-striped my-5">
     <tr>
         {% for cell in head_row %}
         <th>{{ cell }}</th>

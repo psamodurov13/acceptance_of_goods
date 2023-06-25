@@ -6,11 +6,25 @@
 
 
 {% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Приемка изделия</li>
+  </ol>
+</nav>
     <h1>{{ title }}</h1>
+{% if not request.user.is_superuser %}
+<form method="post" class="lg-fields">
+{% else %}
 <form method="post">
+{% endif %}
   {% csrf_token %}
     {{ form|crispy }}
+    {% if not request.user.is_superuser %}
+    <button type="submit" class="btn btn-lg btn-primary">Добавить</button>
+    {% else %}
     <button type="submit" class="btn btn-primary">Добавить</button>
+    {% endif %}
 </form>
 
 {% endblock %}

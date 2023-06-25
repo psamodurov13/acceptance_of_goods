@@ -5,11 +5,20 @@
 {% block title %}Удаление группы товаров{% endblock %}
 
 {% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_page' %}">Страница администратора</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'products_catalog' %}">Редактирование номенклатуры</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Удаление группы товаров</li>
+  </ol>
+</nav>
     <h1>Удаление группы товаров</h1>
 <form method="post">
   {% csrf_token %}
   <p>Вы действительно хотите удалить "{{ object }}"?</p>
     {{ form|crispy }}
+    <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
     <button type="submit" class="btn btn-primary">Да</button>
 </form>
 {% endblock %}

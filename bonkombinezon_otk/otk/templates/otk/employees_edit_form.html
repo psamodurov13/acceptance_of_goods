@@ -5,10 +5,19 @@
 {% block title %}Изменение сотрудника{% endblock %}
 
 {% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_page' %}">Страница администратора</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'employees_catalog' %}">Текущие сотрудники</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Изменение сотрудника</li>
+  </ol>
+</nav>
     <h1>Изменение сотрудника</h1>
 <form method="post">
   {% csrf_token %}
     {{ form|crispy }}
+    <a type=button value="Previous Page" onClick="javascript:history.go(-1);" class="btn btn-primary">Назад</a>
     <button type="submit" class="btn btn-primary">Сохранить</button>
 </form>
 {% endblock %}

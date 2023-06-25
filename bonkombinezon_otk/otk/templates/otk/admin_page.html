@@ -6,6 +6,12 @@
 
 
 {% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Страница администратора</li>
+  </ol>
+</nav>
     <h1>{{ title }}</h1>
 <div class="d-grid gap-2 col-sm-12 col-lg-4">
     <a href="{% url 'employees_catalog' %}" class="btn btn-primary">Текущие сотрудники</a>

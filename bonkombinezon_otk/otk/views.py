@@ -1,5 +1,6 @@
 import time
-
+import pandas as pd
+from bonkombinezon_otk.settings import BASE_DIR
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
@@ -45,6 +46,9 @@ def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datet
                 category=category
             )
             logger.info(f'ALL PRODUCTS OF CATEGORY {category} - {products}')
+            end_date = datetime(end_date.year, end_date.month, end_date.day)
+            logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
+            end_date = end_date + timedelta(1)
             acceptances = Acceptance.objects.filter(
                 product__in=products,
                 employee=employee,
@@ -198,8 +202,11 @@ def acceptance_list(request):
             logger.info(f'EMPLOYEES - {employees}')
             start_date = form_data['start_date']
             end_date = form_data['end_date']
+            end_date = datetime(end_date.year, end_date.month, end_date.day)
+            logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
+            end_date = end_date + timedelta(1)
             acceptances = Acceptance.objects.filter(acceptance_date__range=[start_date, end_date],
-                                                    employee__in=employees)
+                                                    employee__in=employees).order_by('-acceptance_date')
             logger.info(f'FILTRED ACCEPTANCES {start_date} - {end_date} / {acceptances}')
         else:
             form_data = form.cleaned_data
@@ -219,7 +226,7 @@ def acceptance_list(request):
             }
         )
         logger.info(f'FIRST form - {form.data}')
-        acceptances = Acceptance.objects.filter(acceptance_date__range=[start_date, end_date])
+        acceptances = Acceptance.objects.filter(acceptance_date__range=[start_date, end_date]).order_by('-acceptance_date')
         logger.info(f'ALL ACCEPTANCES FOR DATERANGE {start_date} - {end_date} / {acceptances}')
     context['form'] = form
     context['acceptances'] = acceptances
@@ -516,6 +523,9 @@ def download_acceptances(request):
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
         employees = Employees.objects.all()
+    end_date = datetime(end_date.year, end_date.month, end_date.day)
+    logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
+    end_date = end_date + timedelta(1)
     logger.info(f'EMP - {employees}, SD - {start_date}, ED - {end_date}')
     result_queryset = Acceptance.objects.filter(
         acceptance_date__range=[start_date, end_date],
@@ -526,6 +536,29 @@ def download_acceptances(request):
            [[i.acceptance_date.astimezone(our_timezone).strftime('%d.%m.%Y %H:%M'), i.employee.name, i.product.category.name, i.product.name] for i in result_queryset]
     logger.info(f'DATA - {data}')
     return ExcelResponse(data, 'Results acceptances')
+
+
+def autodownload_acceptances(period=30):
+    end_date = datetime.today()
+    start_date = end_date - timedelta(days=period)
+    employees = Employees.objects.all()
+    end_date = datetime(end_date.year, end_date.month, end_date.day)
+    logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
+    end_date = end_date + timedelta(1)
+    logger.info(f'EMP - {employees}, SD - {start_date}, ED - {end_date}')
+    result_queryset = Acceptance.objects.filter(
+        acceptance_date__range=[start_date, end_date],
+        employee_id__in=employees
+    )
+    logger.info(f'QS - {result_queryset}')
+    data = [['Время', 'Сотрудник', 'Категория', 'Изделие']] + \
+           [[i.acceptance_date.astimezone(our_timezone).strftime('%d.%m.%Y %H:%M'), i.employee.name,
+             i.product.category.name, i.product.name] for i in result_queryset]
+    logger.info(f'DATA - {data}')
+    df = pd.DataFrame(data)
+    df.to_excel(f'{BASE_DIR}/backups/backup-{datetime.today().strftime("%d.%m.%Y")}.xlsx', index=False, header=False)
+    return 'Done'
+
 
 
 def download_report(request):

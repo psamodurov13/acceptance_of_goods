@@ -7,11 +7,14 @@
 
 {% block content %}
     <h1>Bonkombinezon - Home page</h1>
-<p>Hi, {{ request.user.username }}</p>
+{% if not request.user.is_superuser %}
+<a href="{% url 'add_acceptance' %}" class="btn btn-primary btn-lg">Принять изделие</a>
+{% else %}
 <a href="{% url 'add_acceptance' %}" class="btn btn-primary">Принять изделие</a>
+{% endif %}
 
-
-<table class="table table-success table-striped">
+{% if results %}
+<table class="table table-success table-striped my-5">
     <tr>
         {% for cell in head_row %}
         <th>{{cell}}</th>
@@ -25,12 +28,16 @@
     </tr>
     {% endfor %}
 </table>
+{% else %}
+<p>Приемок сегодня еще не было</p>
+{% endif %}
 
 
 
-
-
+{% if not request.user.is_superuser %}
+<a href="{% url 'home' %}" class="btn btn-primary disabled">Администратор</a>
+{% else %}
 <a href="{% url 'admin_page' %}" class="btn btn-primary">Администратор</a>
-
+{% endif %}
 
 {% endblock %}
