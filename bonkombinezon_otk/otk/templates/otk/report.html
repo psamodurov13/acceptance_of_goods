@@ -20,6 +20,15 @@
     {{ form.end_date|as_crispy_field }}
     {{ form.products|as_crispy_field }}
     <script>
+      $(function () {
+        $(".datetimepicker").datetimepicker({
+          format: 'd.m.Y',
+            timepicker: false,
+        });
+        $.datetimepicker.setLocale('ru');
+      });
+    </script>
+    <script>
         const checkboxes = document.getElementsByName('products')
         function disableAll() {
             checkboxes.forEach(function(checkbox) {

@@ -33,6 +33,9 @@ def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datet
     final_row = ['Итого'] + [0] * len(categories) + [0]
     logger.info(f'FINAL ROW {final_row}')
     logger.info(f'HEAD ROW ')
+    end_date = datetime(end_date.year, end_date.month, end_date.day)
+    logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
+    end_date = end_date + timedelta(1)
     if not all_products:
         all_products = Products.objects.all()
     results = []
@@ -46,9 +49,6 @@ def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datet
                 category=category
             )
             logger.info(f'ALL PRODUCTS OF CATEGORY {category} - {products}')
-            end_date = datetime(end_date.year, end_date.month, end_date.day)
-            logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
-            end_date = end_date + timedelta(1)
             acceptances = Acceptance.objects.filter(
                 product__in=products,
                 employee=employee,
@@ -579,3 +579,6 @@ def download_report(request):
     data = [head_row] + results + [final_row]
     logger.info(f'DATA - {data}')
     return ExcelResponse(data, 'Results report')
+
+
+

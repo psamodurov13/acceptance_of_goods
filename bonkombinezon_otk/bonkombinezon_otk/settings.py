@@ -90,16 +90,16 @@ WSGI_APPLICATION = 'bonkombinezon_otk.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DB_NAME,
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': DB_NAME,
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }
+# }
 
 LOGIN_URL = 'login_page'
 
@@ -136,10 +136,10 @@ LANGUAGE_CODE = "ru-ru"
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'bonkombinezon_otk/static/'
-]
+# STATIC_ROOT = BASE_DIR / 'static/'
+# STATICFILES_DIRS = [
+#     BASE_DIR / 'bonkombinezon_otk/static/'
+# ]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -148,3 +148,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+try:
+    from .local_settings import *
+except ImportError:
+    from .prod_settings import *

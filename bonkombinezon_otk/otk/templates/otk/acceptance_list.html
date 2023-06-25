@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load crispy_forms_filters %}
-
 {% block title %}{{ title }}{% endblock %}
 
 
@@ -14,8 +13,18 @@
   </ol>
 </nav>
     <h1>{{ title }}</h1>
+
 <form method="get">
     {{ form|crispy }}
+    <script>
+      $(function () {
+        $(".datetimepicker").datetimepicker({
+          format: 'd.m.Y',
+            timepicker: false,
+        });
+        $.datetimepicker.setLocale('ru');
+      });
+    </script>
     <button type="submit" class="btn btn-primary">Фильтр</button>
 </form>
 <table class="table table-success table-striped my-5">

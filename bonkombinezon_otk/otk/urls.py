@@ -27,9 +27,8 @@ urlpatterns = [
     path('download_acceptances', views.download_acceptances, name='download_acceptances'),
     path('report', views.report, name='report'),
     path('download_report', views.download_report, name='download_report'),
+    # path('download_backups', views.download_backups, name='download_backups'),
     # path('create_acceptance', views.create_acceptance, name="create_acceptance"),
-
-
     # path('categories/<int:pk>'), views.
 
 ]
