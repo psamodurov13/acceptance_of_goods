@@ -21,7 +21,7 @@ from bonkombinezon_otk.utils import *
 from datetime import datetime, timedelta
 from excel_response import ExcelResponse
 import pytz
-our_timezone = pytz.timezone('Europe/Istanbul')
+our_timezone = pytz.timezone('Asia/Omsk')
 
 
 def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datetime.today(),
@@ -34,6 +34,7 @@ def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datet
     logger.info(f'FINAL ROW {final_row}')
     logger.info(f'HEAD ROW ')
     end_date = datetime(end_date.year, end_date.month, end_date.day)
+    logger.info(f'start_date {start_date}')
     logger.info(f'end_date - {datetime(end_date.year, end_date.month, end_date.day, tzinfo=our_timezone)}')
     end_date = end_date + timedelta(1)
     if not all_products:
@@ -58,6 +59,8 @@ def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datet
             counts = acceptances.count()
             result.append(counts)
             logger.info(f'RESULT - {result}')
+            if not category.amount:
+                return False
             total += counts * category.amount
             logger.info(f'CURRENT TOTAL - {counts * category.amount}')
         result.append(total)
@@ -181,6 +184,8 @@ def add_acceptance(request):
             messages.success(request, f'Создана новая приемка изделия')
             return redirect('home')
         else:
+            logger.info(f'FORM ERRORS - {form.errors}')
+            context['form'] = form
             messages.error(request, 'Допущена ошибка. Проверьте форму')
             return render(request, 'otk/add_acceptance.html', context)
     form = CreateAcceptanceForm()
@@ -278,7 +283,12 @@ def report(request):
             }
         )
         # logger.info(f'FIRST form - {form.data}')
-    head_row, results, final_row = get_results(start_date, end_date, employees, products)
+    get_results_response = get_results(start_date, end_date, employees, products)
+    if get_results_response:
+        head_row, results, final_row = get_results_response
+    else:
+        messages.error(request, 'Заполните стоимость для всех категорий')
+        return redirect('products_catalog')
     context['form'] = form
     context['head_row'] = head_row
     context['results'] = results
@@ -568,17 +578,33 @@ def download_report(request):
         logger.info(f'EMPLOYEES - {employees}')
         start_date = datetime.strptime(request.GET['start_date'], '%d.%m.%Y')
         end_date = datetime.strptime(request.GET['end_date'], '%d.%m.%Y')
-        products = Products.objects.filter(id__in=request.GET['products'])
+        products_id = []
+        for i in request.GET.getlist('products'):
+            if not i.startswith('category'):
+                products_id.append(i)
+        products = Products.objects.filter(id__in=products_id)
+        logger.info(f'REQ PRODUCTS - {request.GET.getlist("products")}')
+        logger.info(f'PRODUCTS - {products}')
     else:
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
         employees = Employees.objects.all()
         products = None
-    head_row, results, final_row = get_results(start_date, end_date, employees, products)
+    # head_row, results, final_row = get_results(start_date, end_date, employees, products)
+    get_results_response = get_results(start_date, end_date, employees, products)
+    if get_results_response:
+        head_row, results, final_row = get_results_response
+    else:
+        messages.error(request, 'Заполните стоимость для всех категорий')
+        return redirect('products_catalog')
     logger.info(f'EMP - {employees}, SD - {start_date}, ED - {end_date}')
     data = [head_row] + results + [final_row]
     logger.info(f'DATA - {data}')
     return ExcelResponse(data, 'Results report')
+
+
+if __name__ == '__main__':
+    autodownload_acceptances()
 
 
 

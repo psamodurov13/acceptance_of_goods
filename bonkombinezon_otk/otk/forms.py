@@ -1,6 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django import forms
+from django.core.exceptions import ValidationError
+
 from .models import *
 from bonkombinezon_otk.settings import logger
 
@@ -28,6 +30,24 @@ class LoadProductsForm(forms.Form):
 class CreateAcceptanceForm(forms.Form):
     employee_barcode = forms.CharField(label="Отсканировать штрихкод сотрудника", widget=forms.TextInput())
     product_barcode = forms.CharField(label="Отсканировать штрихкод изделия", widget=forms.TextInput())
+
+    def clean(self):
+        cleaned_data = super().clean()
+        employee_barcode = cleaned_data.get("employee_barcode")
+        product_barcode = cleaned_data.get("product_barcode")
+        all_employees_id = [i.barcode for i in Employees.objects.all()]
+        all_products_id = [i.barcode for i in Products.objects.all()]
+
+        errors = {}
+        if employee_barcode not in all_employees_id:
+            logger.info('Raise VE1')
+            errors['employee_barcode'] = ValidationError("Сотрудник с таким штрихкодом не существует")
+        if product_barcode not in all_products_id:
+            logger.info('Raise VE2')
+            errors['product_barcode'] = ValidationError("Товар с таким штрихкодом не существует")
+        if errors:
+            raise ValidationError(errors)
+
 
 
 class AcceptanceFilterForm(forms.Form):

@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     'otk.apps.OtkConfig',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_crontab'
+]
+CRONJOBS = [
+    ('* * * * *', 'otk.cron.my_scheduled_job')
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -129,7 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 USE_I18N = True
 USE_TZ = True
-TIME_ZONE = "Europe/Istanbul"
+TIME_ZONE = "Asia/Omsk"
 LANGUAGE_CODE = "ru-ru"
 
 # Static files (CSS, JavaScript, Images)
