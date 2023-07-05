@@ -14,7 +14,8 @@
 </nav>
     <h1>{{ title }}</h1>
 
-<form method="get">
+<form method="post">
+    {% csrf_token %}
     {{ form|crispy }}
     <script>
       $(function () {

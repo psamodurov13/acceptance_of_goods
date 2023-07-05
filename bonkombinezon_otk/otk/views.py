@@ -197,9 +197,9 @@ def acceptance_list(request):
     context = {
         'title': 'Редактировать данные внесенные ранее'
     }
-    if request.GET:
-        form = AcceptanceFilterForm(request.GET)
-        logger.info(f'REQUEST DATA - {request.GET}')
+    if request.POST:
+        form = AcceptanceFilterForm(request.POST)
+        logger.info(f'REQUEST DATA - {request.POST}')
         if form.is_valid():
             form_data = form.cleaned_data
             logger.info(f'ACCEPTANCE LIST FORM DATA - {form_data}')
@@ -244,9 +244,9 @@ def report(request):
     context = {
         'title': 'Отчет за период (Ведомость)'
     }
-    if request.GET:
-        form = ReportFilterForm(request.GET)
-        logger.info(f'REQUEST DATA - {request.GET}')
+    if request.POST:
+        form = ReportFilterForm(request.POST)
+        logger.info(f'REQUEST DATA - {request.POST}')
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['products']:
@@ -260,7 +260,7 @@ def report(request):
             # acceptances = Acceptance.objects.filter(acceptance_date__range=[start_date, end_date],
             #                                         employee__in=employees)
             products = Products.objects.filter(id__in=form_data['products'])
-            logger.info(f'PRODUCTS {len(products)} - {employees}')
+            logger.info(f'PRODUCTS {len(products)} {products} - {employees}')
             # logger.info(f'FILTRED ACCEPTANCES {start_date} - {end_date} / {acceptances}')
         else:
             form_data = form.cleaned_data

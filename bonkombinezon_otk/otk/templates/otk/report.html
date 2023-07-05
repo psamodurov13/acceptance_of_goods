@@ -14,8 +14,18 @@
   </ol>
 </nav>
     <h1>{{ title }}</h1>
-<form method="get">
+<form method="post">
+      {% csrf_token %}
     {{ form.employee|as_crispy_field }}
+    <div class="my-3">
+        <span>
+            <button onclick="disableAll('employee')" type="button" class="btn btn-link">Снять все</button>
+        </span>
+        <span>
+            <button onclick="enableAll('employee')" type="button" class="btn btn-link">Выделить все</button>
+        </span>
+    </div>
+
     {{ form.start_date|as_crispy_field }}
     {{ form.end_date|as_crispy_field }}
     {{ form.products|as_crispy_field }}
@@ -28,31 +38,33 @@
         $.datetimepicker.setLocale('ru');
       });
     </script>
+
+    <div class="my-3">
+        <span>
+            <button onclick="disableAll('products')" type="button" class="btn btn-link">Снять все</button>
+        </span>
+        <span>
+            <button onclick="enableAll('products')" type="button" class="btn btn-link">Выделить все</button>
+        </span>
+    </div>
+
+
     <script>
-        const checkboxes = document.getElementsByName('products')
-        function disableAll() {
+        function disableAll(elementClass) {
+            const checkboxes = document.getElementsByName(elementClass)
             checkboxes.forEach(function(checkbox) {
                     checkbox.checked = false
                 }
             )
         }
-        function enableAll() {
+        function enableAll(elementClass) {
+            const checkboxes = document.getElementsByName(elementClass)
             checkboxes.forEach(function(checkbox) {
                     checkbox.checked = true
                 }
             )
         }
     </script>
-
-    <div>
-        <span>
-            <button onclick="disableAll()" type="button" class="btn btn-link">Снять все</button>
-        </span>
-        <span>
-            <button onclick="enableAll()" type="button" class="btn btn-link">Выделить все</button>
-        </span>
-    </div>
-
     <script>
         const productsField = document.querySelectorAll('#div_id_products > div .form-check')
         productsField.forEach(function(elem) {
