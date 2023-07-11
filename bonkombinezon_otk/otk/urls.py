@@ -26,6 +26,7 @@ urlpatterns = [
     path('acceptance_list', views.acceptance_list, name='acceptance_list'),
     path('download_acceptances', views.download_acceptances, name='download_acceptances'),
     path('report', views.report, name='report'),
+    path('report_by_employee/<int:employee_id>', views.report_by_employee, name='report_by_employee'),
     path('download_report', views.download_report, name='download_report'),
     # path('download_backups', views.download_backups, name='download_backups'),
     # path('create_acceptance', views.create_acceptance, name="create_acceptance"),

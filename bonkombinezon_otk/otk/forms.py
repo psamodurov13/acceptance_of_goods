@@ -76,3 +76,18 @@ class ReportFilterForm(forms.Form):
     products = forms.MultipleChoiceField(label='Товары', choices=choices,
                                  required=False, widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom'}),
                                          initial=[c[0] for c in choices])
+
+    def __init__(self, *args, **kwargs):
+        try:
+            employees = kwargs.get('initial')['employees']
+        except TypeError:
+            logger.info(f'NOT INITIAL IN KWARGS')
+            employees = Employees.objects.all()
+        super().__init__(*args, **kwargs)
+        logger.info(f'EMPLOYEES FROM FORM {employees}')
+        self.fields['employee'] = forms.MultipleChoiceField(label='Испольнитель',
+                                             choices=((i.pk, i.name) for i in Employees.objects.all()),
+                                             required=False, widget=forms.CheckboxSelectMultiple(),
+                                             initial=[c.pk for c in employees])
+
+

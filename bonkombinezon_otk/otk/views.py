@@ -40,6 +40,7 @@ def get_results(start_date=datetime.today() - timedelta(days=14), end_date=datet
     if not all_products:
         all_products = Products.objects.all()
     results = []
+    acceptances = None
     for employee in employees:
         logger.info('-' * 10)
         logger.info(f'START FORM DATA FOR {employee.name}')
@@ -176,6 +177,17 @@ def add_acceptance(request):
             logger.info(f'EMPLOYEE FOR ACCEPTANCE - {employee}')
             product = Products.objects.get(barcode=form_data['product_barcode'])
             logger.info(f'PRODUCT FOR ACCEPTANCE - {product}')
+            time_now = datetime.now()
+            before_time = time_now - timedelta(minutes=2)
+            check_duplicate = Acceptance.objects.filter(
+                employee=employee,
+                product=product,
+                acceptance_date__range=[before_time, time_now]
+            )
+            if check_duplicate:
+                messages.error(request,
+                               f'Такая приемка уже создана {check_duplicate[0].acceptance_date.astimezone(our_timezone).strftime("%d.%m.%Y %H:%M")}')
+                return redirect('home')
             new_acceptance = Acceptance.objects.create(
                 employee=employee,
                 product=product
@@ -238,6 +250,9 @@ def acceptance_list(request):
     return render(request, 'otk/acceptance_list.html', context)
 
 
+def report_by_employee(request, employee_id):
+    request.session['initial_data'] = employee_id
+    return redirect(report)
 
 
 def report(request):
@@ -270,9 +285,16 @@ def report(request):
             acceptances = None
             return render(request, 'otk/report.html', context)
     else:
+        initial_data = request.session.get('initial_data')
+        logger.info(f'SESSION INIT DATA - {initial_data}')
+        logger.info(f'SESSION EMPLOYEE ID - {request.session}')
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
-        employees = Employees.objects.all()
+        if not initial_data:
+            employees = Employees.objects.all()
+        else:
+            employees = Employees.objects.filter(id=initial_data)
+            logger.info(f'EMPLOYEES - {employees}')
         products = None
         form = ReportFilterForm(
             initial={
@@ -282,14 +304,17 @@ def report(request):
                 # 'products': products
             }
         )
+        if initial_data:
+            del request.session['initial_data']
+        logger.info(f'SESSION AFTER REMOVE - {request.session.get("initial_data")}')
         # logger.info(f'FIRST form - {form.data}')
+    context['form'] = form
     get_results_response = get_results(start_date, end_date, employees, products)
     if get_results_response:
         head_row, results, final_row = get_results_response
     else:
         messages.error(request, 'Заполните стоимость для всех категорий')
         return redirect('products_catalog')
-    context['form'] = form
     context['head_row'] = head_row
     context['results'] = results
     context['final_row'] = final_row
