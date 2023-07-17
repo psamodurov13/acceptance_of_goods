@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'otk.apps.OtkConfig',
+    'rating.apps.RatingConfig',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_crontab'
