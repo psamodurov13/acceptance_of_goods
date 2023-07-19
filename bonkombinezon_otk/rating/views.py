@@ -8,11 +8,12 @@ from bonkombinezon_otk.settings import logger
 
 
 def rating_page(request):
+    weeks = TimePeriod.objects.get(id=1).period
     time_now = datetime.now()
-    before_time = time_now - timedelta(days=14)
+    before_time = time_now - timedelta(days=weeks * 7)
     employees = Employees.objects.all()
     rating_ranges = RatingRange.objects.all()
-    days = 10
+    days = weeks * 5
     results = []
     for emp in employees:
         result = {
