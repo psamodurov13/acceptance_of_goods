@@ -21,6 +21,7 @@ from bonkombinezon_otk.utils import *
 from datetime import datetime, timedelta
 from excel_response import ExcelResponse
 import pytz
+import json
 our_timezone = pytz.timezone('Asia/Omsk')
 
 
@@ -212,6 +213,9 @@ def acceptance_list(request):
     if request.POST:
         form = AcceptanceFilterForm(request.POST)
         logger.info(f'REQUEST DATA - {request.POST}')
+        form_data_for_download = dict(request.POST)
+        logger.info(f'form_data_for_download - {form_data_for_download}')
+        request.session['form_data_for_download'] = form_data_for_download
         if form.is_valid():
             form_data = form.cleaned_data
             logger.info(f'ACCEPTANCE LIST FORM DATA - {form_data}')
@@ -232,6 +236,7 @@ def acceptance_list(request):
             logger.info(f'ERRORS - {form.errors}')
             acceptances = None
     else:
+        request.session['form_data_for_download'] = None
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
         employees = Employees.objects.all()
@@ -262,6 +267,9 @@ def report(request):
     if request.POST:
         form = ReportFilterForm(request.POST)
         logger.info(f'REQUEST DATA - {request.POST}')
+        form_data_for_report = dict(request.POST)
+        logger.info(f'form_data_for_report - {form_data_for_report}')
+        request.session['form_data_for_report'] = form_data_for_report
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['products']:
@@ -280,11 +288,12 @@ def report(request):
         else:
             form_data = form.cleaned_data
             logger.info(f'INVALID FORM')
-            logger.info(f'ACCEPTANCE LIST FORM DATA - {form_data}')
             logger.info(f'ERRORS - {form.errors}')
+            request.session['form_data_for_report'] = None
             acceptances = None
             return render(request, 'otk/report.html', context)
     else:
+        request.session['form_data_for_report'] = None
         initial_data = request.session.get('initial_data')
         logger.info(f'SESSION INIT DATA - {initial_data}')
         logger.info(f'SESSION EMPLOYEE ID - {request.session}')
@@ -549,11 +558,12 @@ class DeleteAcceptance(CustomStr, DeleteView):
 
 
 def download_acceptances(request):
-    logger.info(f'STARTING DOWNLOAD ACCEPTANCES - {request.GET} / {request.GET.urlencode}')
-    if request.GET:
-        employees = request.GET.getlist('employee')
-        start_date = datetime.strptime(request.GET['start_date'], '%d.%m.%Y')
-        end_date = datetime.strptime(request.GET['end_date'], '%d.%m.%Y')
+    form_data = request.session.get('form_data_for_download')
+    logger.info(f'STARTING DOWNLOAD ACCEPTANCES - {form_data}')
+    if form_data:
+        employees = form_data['employee']
+        start_date = datetime.strptime(form_data['start_date'][0], '%d.%m.%Y')
+        end_date = datetime.strptime(form_data['end_date'][0], '%d.%m.%Y')
     else:
         end_date = datetime.today()
         start_date = end_date - timedelta(days=14)
@@ -595,20 +605,21 @@ def autodownload_acceptances(period=30):
     return 'Done'
 
 
-
 def download_report(request):
-    logger.info(f'STARTING DOWNLOAD REPORT - {request.GET} / {request.GET.urlencode}')
-    if request.GET:
-        employees = Employees.objects.filter(id__in=request.GET.getlist('employee'))
+    form_data = request.session.get('form_data_for_report')
+    # form_data = json.loads(form_data_for_report)
+    logger.info(f'STARTING DOWNLOAD REPORT - {form_data}')
+    if form_data:
+        employees = Employees.objects.filter(id__in=form_data['employee'])
         logger.info(f'EMPLOYEES - {employees}')
-        start_date = datetime.strptime(request.GET['start_date'], '%d.%m.%Y')
-        end_date = datetime.strptime(request.GET['end_date'], '%d.%m.%Y')
+        start_date = datetime.strptime(form_data['start_date'][0], '%d.%m.%Y')
+        end_date = datetime.strptime(form_data['end_date'][0], '%d.%m.%Y')
         products_id = []
-        for i in request.GET.getlist('products'):
+        for i in form_data['products']:
             if not i.startswith('category'):
                 products_id.append(i)
         products = Products.objects.filter(id__in=products_id)
-        logger.info(f'REQ PRODUCTS - {request.GET.getlist("products")}')
+        logger.info(f'REQ PRODUCTS - {form_data["products"]}')
         logger.info(f'PRODUCTS - {products}')
     else:
         end_date = datetime.today()

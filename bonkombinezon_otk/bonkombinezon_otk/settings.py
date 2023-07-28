@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'django_crontab'
 ]
 CRONJOBS = [
-    ('* * * * *', 'otk.cron.my_scheduled_job')
+    ('* 17 * * *', 'otk.cron.my_scheduled_job')
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
