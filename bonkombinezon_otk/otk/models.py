@@ -2,17 +2,19 @@ from datetime import datetime
 
 from django.db import models
 from django.urls import reverse
-
-from bonkombinezon_otk.utils import CustomStr
+from bonkombinezon_otk.utils import CustomStr, default_schedule
+from datetime import date
 
 
 class Employees(CustomStr, models.Model):
     name = models.CharField(max_length=255, verbose_name='Фамилия Имя Отчество')
     barcode = models.CharField(max_length=128, verbose_name='Штрихкод')
+    schedule = models.JSONField(verbose_name='График работы', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Сотрудник'
         verbose_name_plural = 'Сотрудники'
+        ordering = ['name']
 
 
 class ProductCategories(CustomStr, models.Model):

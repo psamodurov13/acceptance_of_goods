@@ -29,3 +29,23 @@ form.lg-fields input.form-control {
 form.lg-fields label {
     font-size: 1.5rem;
 }
+table .weekend {
+    background-color: yellow;
+}
+table .custom-btn {
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    height: 100%;
+    background: none;
+}
+table .custom-btn:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}
+table .red-btn {
+    background-color: lightcoral;
+}
+table .green-btn {
+    background-color: lightgreen;
+}

@@ -51,9 +51,9 @@ class CreateAcceptanceForm(forms.Form):
 
 
 class AcceptanceFilterForm(forms.Form):
-    employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
-                                 required=False, widget=forms.CheckboxSelectMultiple(),
-                                         initial=[c.pk for c in Employees.objects.all()])
+    # employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
+    #                              required=False, widget=forms.CheckboxSelectMultiple(),
+    #                                      initial=[c.pk for c in Employees.objects.all()])
     start_date = forms.DateField(label='От', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
     end_date = forms.DateField(label='До', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
 
@@ -68,9 +68,9 @@ class ReportFilterForm(forms.Form):
             logger.info(f'---PRODUCT - {product.name}')
     logger.info(f'CHOICES - {choices}')
 
-    employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
-                                 required=False, widget=forms.CheckboxSelectMultiple(),
-                                         initial=[c.pk for c in Employees.objects.all()])
+    # employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
+    #                              required=False, widget=forms.CheckboxSelectMultiple(),
+    #                                      initial=[c.pk for c in Employees.objects.all()])
     start_date = forms.DateField(label='От', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
     end_date = forms.DateField(label='До', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
     products = forms.MultipleChoiceField(label='Товары', choices=choices,
@@ -89,5 +89,15 @@ class ReportFilterForm(forms.Form):
                                              choices=((i.pk, i.name) for i in Employees.objects.all()),
                                              required=False, widget=forms.CheckboxSelectMultiple(),
                                              initial=[c.pk for c in employees])
+
+
+class ChangeScheduleForm(forms.Form):
+    choices = [('Р', 'Р'), ('В', 'В'), ('Б', 'Б'), ('О', 'О')]
+    logger.info(f'CHOICES - {choices}')
+
+    date = forms.DateField(label='Дата', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
+    type_of_day = forms.ChoiceField(label='День', choices=choices,
+                                 required=True, widget=forms.Select(attrs={'class': 'custom'}),
+                                         initial=[c[0] for c in choices])
 
 

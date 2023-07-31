@@ -505,6 +505,8 @@ class CreateEmployee(CustomStr, CreateView):
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         self.object = form.save()
+        self.object.schedule = default_schedule(date.today().year)
+        self.object.save()
         messages.success(self.request, 'Сотрудник добавлен')
         return super().form_valid(form)
 
@@ -637,6 +639,37 @@ def download_report(request):
     data = [head_row] + results + [final_row]
     logger.info(f'DATA - {data}')
     return ExcelResponse(data, 'Results report')
+
+
+def schedule_page(request):
+    context = {
+        'title': 'График работы'
+    }
+    year = request.session.get('schedule_year')
+    logger.info(f'FIRST YEAR - {year}')
+    if not year:
+        year = date.today().year
+        logger.info(f'SECOND YEAR - {year}')
+    schedule = {}
+    employees = Employees.objects.all()
+    for month_number, month_name in months.items():
+        days = monthrange(year, month_number)
+        weekdays = []
+        all_days = []
+        for day in range(1, days[1] + 1):
+            weekdays.append(date(year, month_number, day).weekday())
+            all_days.append(day)
+        employees_rows = {}
+        for employee in employees:
+            # logger.info(f'EMPLOYEE SCH - {employee.schedule} / {type(employee.schedule)}')
+            employees_rows[employee.barcode] = [employee] + [i for i in employee.schedule[str(year)][str(month_number)].values()]
+            # logger.info(f'employees_rows - {employees_rows[employee.barcode]}')
+        schedule[month_name] = {'weekdays': weekdays, 'all_days': all_days,
+                                'employees_rows': employees_rows, 'month_number': month_number}
+    context['result_dict'] = schedule
+    context['form'] = ChangeScheduleForm()
+    context['year'] = year
+    return render(request, 'otk/schedule_page.html', context)
 
 
 if __name__ == '__main__':
