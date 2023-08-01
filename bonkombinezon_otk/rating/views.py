@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+import pandas as pd
 from django.http import HttpResponse
 from django.shortcuts import render
 from otk.models import Employees
@@ -19,6 +19,20 @@ def rating_page(request):
         result = {
             'name': emp.name,
         }
+        schedule = emp.schedule
+        logger.info(f'BEFORE TIME - {before_time}')
+        logger.info(f'BEFORE TIME - {time_now}')
+        logger.info(f'RANGE ')
+
+        res = pd.date_range(
+            min(before_time, time_now),
+            max(before_time, time_now)
+        ).tolist()
+        logger.info(f'RANGE - {[f"{i.month}-{i.day}" for i in res]}')
+        days = 0
+        for i in res:
+            if schedule[str(i.year)][str(i.month)][str(i.day)] == 'Р':
+                days += 1
         emp_acceptances = emp.acceptances.filter(acceptance_date__range=[before_time, time_now]).count()
         result['acceptances'] = emp_acceptances
         emp_rating = emp_acceptances / days
@@ -29,6 +43,7 @@ def rating_page(request):
                 logger.info(f'{emp.name} in {rating_range.name} with qty = {emp_acceptances}')
                 result['rating_color'] = rating_range.color
                 result['rating_text_color'] = rating_range.text_color
+                result['days'] = days
             else:
                 logger.info(f'{emp.name} NOT in {rating_range.name} with qty = {emp_acceptances}')
         logger.info(f'{emp.name} - {emp.acceptances.all().count()}')

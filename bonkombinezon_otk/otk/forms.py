@@ -93,11 +93,23 @@ class ReportFilterForm(forms.Form):
 
 class ChangeScheduleForm(forms.Form):
     choices = [('Р', 'Р'), ('В', 'В'), ('Б', 'Б'), ('О', 'О')]
+    employees_choices = [(i.id, i.name) for i in Employees.objects.all()]
     logger.info(f'CHOICES - {choices}')
 
     date = forms.DateField(label='Дата', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
-    type_of_day = forms.ChoiceField(label='День', choices=choices,
-                                 required=True, widget=forms.Select(attrs={'class': 'custom'}),
-                                         initial=[c[0] for c in choices])
+    type_of_day = forms.ChoiceField(label='День', choices=choices, required=True,
+                                    widget=forms.Select(attrs={'class': 'custom'}))
+    employee = forms.ChoiceField(label='Сотрудник', choices=employees_choices, required=True,
+                                 widget=forms.Select(attrs={'class': 'custom'}))
+
+
+class ChangeScheduleMultipleForm(forms.Form):
+    choices = [('Р', 'Р'), ('В', 'В'), ('Б', 'Б'), ('О', 'О')]
+
+    date_employee = forms.JSONField(label='Данные', widget=forms.HiddenInput())
+    type_of_day = forms.ChoiceField(label='День', choices=choices, required=True,
+                                    widget=forms.Select(attrs={'class': 'custom'}))
+
+
 
 

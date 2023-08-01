@@ -650,6 +650,56 @@ def schedule_page(request):
     if not year:
         year = date.today().year
         logger.info(f'SECOND YEAR - {year}')
+    if request.method == 'POST' and 'single-date-button' in request.POST:
+        post = request.POST.copy()
+        logger.info(f'POST  - {post}')
+        request.POST = post
+        form = ChangeScheduleForm(request.POST)
+        if form.is_valid():
+            form_data = form.cleaned_data
+            logger.info(f'FORM DATA - {form_data}')
+            employee = Employees.objects.get(id=form_data['employee'])
+            employee_schedule = employee.schedule
+            form_year, form_month, form_day = [str(i) for i in [form_data['date'].year, form_data['date'].month, form_data['date'].day]]
+            employee_schedule[form_year][form_month][form_day] = form_data['type_of_day']
+            employee.schedule = employee_schedule
+            employee.save()
+            logger.info(f'EMPLOYEE SCHEDULE WAS CHANGED')
+            messages.success(request, f'Данные изменены')
+        else:
+            logger.info(f'FORM ERRORS - {form.errors}')
+            context['form'] = form
+            messages.error(request, 'Допущена ошибка. Проверьте форму')
+            return render(request, 'otk/schedule_page.html', context)
+    elif request.method == 'POST' and 'multiple-date-button' in request.POST:
+        post = request.POST.copy()
+        logger.info(f'POST  - {post}')
+        request.POST = post
+        form = ChangeScheduleMultipleForm(request.POST)
+        if form.is_valid():
+            form_data = form.cleaned_data
+            logger.info(f'FORM DATA - {form_data}')
+            for employee_id, date_list in form_data['date_employee'].items():
+                employee = Employees.objects.get(id=employee_id)
+                schedule = employee.schedule
+                for date_dict in date_list:
+                    schedule[date_dict['year']][date_dict['month']][date_dict['day']] = form_data['type_of_day']
+                employee.schedule = schedule
+                employee.save()
+            # employee = Employees.objects.get(id=form_data['employee'])
+            # employee_schedule = employee.schedule
+            # form_year, form_month, form_day = [str(i) for i in
+            #                                    [form_data['date'].year, form_data['date'].month, form_data['date'].day]]
+            # employee_schedule[form_year][form_month][form_day] = form_data['type_of_day']
+            # employee.schedule = employee_schedule
+            # employee.save()
+            # logger.info(f'EMPLOYEE SCHEDULE WAS CHANGED')
+            messages.success(request, f'Данные изменены')
+        else:
+            logger.info(f'FORM ERRORS - {form.errors}')
+            context['form'] = form
+            messages.error(request, 'Допущена ошибка. Проверьте форму')
+            return render(request, 'otk/schedule_page.html', context)
     schedule = {}
     employees = Employees.objects.all()
     for month_number, month_name in months.items():
@@ -662,12 +712,13 @@ def schedule_page(request):
         employees_rows = {}
         for employee in employees:
             # logger.info(f'EMPLOYEE SCH - {employee.schedule} / {type(employee.schedule)}')
-            employees_rows[employee.barcode] = [employee] + [i for i in employee.schedule[str(year)][str(month_number)].values()]
+            employees_rows[employee.id] = [employee] + [i for i in employee.schedule[str(year)][str(month_number)].values()]
             # logger.info(f'employees_rows - {employees_rows[employee.barcode]}')
         schedule[month_name] = {'weekdays': weekdays, 'all_days': all_days,
                                 'employees_rows': employees_rows, 'month_number': month_number}
     context['result_dict'] = schedule
     context['form'] = ChangeScheduleForm()
+    context['form_multiple'] = ChangeScheduleMultipleForm()
     context['year'] = year
     return render(request, 'otk/schedule_page.html', context)
 
