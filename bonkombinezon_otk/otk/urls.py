@@ -28,7 +28,10 @@ urlpatterns = [
     path('report', views.report, name='report'),
     path('report_by_employee/<int:employee_id>', views.report_by_employee, name='report_by_employee'),
     path('download_report', views.download_report, name='download_report'),
-    path('schedule', views.schedule_page, name='schedule')
+    path('schedule', views.schedule_page, name='schedule'),
+    path('activate_year/<str:year>', views.activate_year, name='activate_year'),
+    path('add_new_schedule_year', views.add_new_schedule_year, name='add_new_schedule_year'),
+
     # path('download_backups', views.download_backups, name='download_backups'),
     # path('create_acceptance', views.create_acceptance, name="create_acceptance"),
     # path('categories/<int:pk>'), views.

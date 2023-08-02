@@ -14,7 +14,13 @@
   </ol>
 </nav>
     <h1>{{ title }}</h1>
-
+{% if request.user.is_superuser %}
+<div class="btn-group">
+  {% for year_in_schedule in years %}
+  <a href="{% url 'activate_year' year_in_schedule %}" class="btn btn-outline-primary {% if year_in_schedule == year %}active{% endif %}">{{ year_in_schedule }}</a>
+  {% endfor %}
+  <a href="{% url 'add_new_schedule_year' %}" class="btn btn-outline-primary">Добавить год</a>
+</div>
 <div class="accordion accordion-flush my-3" id="accordionFines">
 {% for month_name, month_data in result_dict.items %}
   <div class="accordion-item">
@@ -286,5 +292,8 @@ document.addEventListener('click', ({ target: t }) => {
   })
 
 </script>
+{% else %}
+<p>Недостаточно прав</p>
+{% endif %}
 
 {% endblock %}

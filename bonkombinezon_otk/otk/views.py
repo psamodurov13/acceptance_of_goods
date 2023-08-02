@@ -486,7 +486,7 @@ def load_products(request):
 
 
 def employees_catalog(request):
-    employees = Employees.objects.all().order_by('id')
+    employees = Employees.objects.all().order_by('name')
     paginator = Paginator(employees, 25)  # сколько записей на 1 странице
     page_number = request.GET.get('page')  # GET параметр page
     page_obj = paginator.get_page(page_number)
@@ -504,8 +504,10 @@ class CreateEmployee(CustomStr, CreateView):
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
+        employees = Employees.objects.all()
+        years = get_schedule_years(employees)
         self.object = form.save()
-        self.object.schedule = default_schedule(date.today().year)
+        self.object.schedule = default_schedule(years)
         self.object.save()
         messages.success(self.request, 'Сотрудник добавлен')
         return super().form_valid(form)
@@ -641,11 +643,14 @@ def download_report(request):
     return ExcelResponse(data, 'Results report')
 
 
+@login_required
 def schedule_page(request):
     context = {
         'title': 'График работы'
     }
     year = request.session.get('schedule_year')
+    if year:
+        year = int(year)
     logger.info(f'FIRST YEAR - {year}')
     if not year:
         year = date.today().year
@@ -720,11 +725,38 @@ def schedule_page(request):
     context['form'] = ChangeScheduleForm()
     context['form_multiple'] = ChangeScheduleMultipleForm()
     context['year'] = year
+    years = get_schedule_years(employees)
+    context['years'] = years
+    logger.info(f'YEARS - {context["years"]}')
     return render(request, 'otk/schedule_page.html', context)
 
 
+def activate_year(request, year):
+    logger.info(f'YEAR - {year}')
+    request.session['schedule_year'] = year
+    last_page = request.META.get("HTTP_REFERER")
+    logger.info(f'LAST PAGE - {last_page}')
+    return redirect(last_page)
+
+
+def add_new_schedule_year(request):
+    employees = Employees.objects.all()
+    years = get_schedule_years(employees)
+    new_year = max(years) + 1
+    new_year_schedule = default_schedule([new_year])
+    for emp in employees:
+        schedule = emp.schedule
+        schedule[new_year] = new_year_schedule[new_year]
+        emp.schedule = schedule
+        emp.save()
+    last_page = request.META.get("HTTP_REFERER")
+    logger.info(f'LAST PAGE - {last_page}')
+    return redirect(last_page)
+
+
 if __name__ == '__main__':
-    autodownload_acceptances()
+    # autodownload_acceptances()
+    add_new_schedule_year()
 
 
 

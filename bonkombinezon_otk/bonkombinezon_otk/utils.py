@@ -23,11 +23,10 @@ def safe_get(Model, **kwargs):
         return None
 
 
-def default_schedule(year=date.today().year):
-    results = {
-        year: {i: {} for i in range(1, 13)},
-        year + 1: {i: {} for i in range(1, 13)}
-    }
+def default_schedule(years=None):
+    if not years:
+        years = [date.today().year, date.today().year + 1]
+    results = {year: {i: {} for i in range(1, 13)} for year in years}
     for year, months in results.items():
         for month in months:
             days = monthrange(year, month)
@@ -37,6 +36,14 @@ def default_schedule(year=date.today().year):
                 else:
                     results[year][month][day] = 'В'
     return results
+
+
+def get_schedule_years(employees):
+    years = []
+    for employee in employees:
+        years.extend(employee.schedule.keys())
+    result = sorted([int(i) for i in list(set(years))])
+    return result
 
 
 months = {

@@ -60,8 +60,8 @@ position: relative;
 }
 .custom-popover-button, .custom-popover-all-button {
 position: absolute;
-left: 40px;
-bottom: 0;
+left: 30px;
+bottom: -40px;
 z-index: 2;
 background: white;
 border: 1px solid lightgray;

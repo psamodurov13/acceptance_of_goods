@@ -49,11 +49,10 @@ class CreateAcceptanceForm(forms.Form):
             raise ValidationError(errors)
 
 
-
 class AcceptanceFilterForm(forms.Form):
-    # employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
-    #                              required=False, widget=forms.CheckboxSelectMultiple(),
-    #                                      initial=[c.pk for c in Employees.objects.all()])
+    employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
+                                 required=False, widget=forms.CheckboxSelectMultiple(),
+                                         initial=[c.pk for c in Employees.objects.all()])
     start_date = forms.DateField(label='От', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
     end_date = forms.DateField(label='До', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
 
@@ -68,9 +67,9 @@ class ReportFilterForm(forms.Form):
             logger.info(f'---PRODUCT - {product.name}')
     logger.info(f'CHOICES - {choices}')
 
-    # employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
-    #                              required=False, widget=forms.CheckboxSelectMultiple(),
-    #                                      initial=[c.pk for c in Employees.objects.all()])
+    employee = forms.MultipleChoiceField(label='Испольнитель', choices=((i.pk, i.name) for i in Employees.objects.all()),
+                                 required=False, widget=forms.CheckboxSelectMultiple(),
+                                         initial=[c.pk for c in Employees.objects.all()])
     start_date = forms.DateField(label='От', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
     end_date = forms.DateField(label='До', input_formats=['%d.%m.%Y'], widget=forms.DateInput(attrs={'class': 'datetimepicker'}))
     products = forms.MultipleChoiceField(label='Товары', choices=choices,
