@@ -11,7 +11,7 @@ def rating_page(request):
     weeks = TimePeriod.objects.get(id=1).period
     time_now = datetime.now()
     before_time = time_now - timedelta(days=weeks * 7)
-    employees = Employees.objects.all()
+    employees = Employees.objects.filter(status=True)
     rating_ranges = RatingRange.objects.all()
     days = weeks * 5
     results = []
@@ -35,8 +35,12 @@ def rating_page(request):
                 days += 1
         emp_acceptances = emp.acceptances.filter(acceptance_date__range=[before_time, time_now]).count()
         result['acceptances'] = emp_acceptances
-        emp_rating = emp_acceptances / days
-        result['rating'] = round(emp_rating, 2)
+        if days > 0:
+            emp_rating = emp_acceptances / days
+            result['rating'] = round(emp_rating, 2)
+        else:
+            emp_rating = 0.0
+            result['rating'] = 0.0
         for rating_range in rating_ranges:
             if int(emp_rating * 100) in range(int(rating_range.min_value * 100),
                                                             int(rating_range.max_value * 100) + 1):

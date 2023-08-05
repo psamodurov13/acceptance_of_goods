@@ -450,10 +450,13 @@ def load_products(request):
             logger.info(f'TOTAL PRODUCTS - {len(products)}, EXAMPLE - {products[0]}')
             new_products = []
             new_categories = []
+            was_added_early = []
             for product in products:
-                current_product = safe_get(Products, name=product['name'], barcode=product['barcode'])
+                current_product = safe_get(Products, barcode=product['barcode'])
                 if current_product:
                     logger.info(f'PRODUCT ALREADY EXIST {current_product}')
+                    was_added_early.append(product['barcode'])
+                    logger.info(f'Товар со штрихкодом {product["barcode"]} был загружен ранее')
                 else:
                     current_category = safe_get(ProductCategories, name=product['category'])
                     if current_category:
@@ -475,6 +478,8 @@ def load_products(request):
                         f'Создано новых категорий - {len(new_categories)}')
             messages.success(request, f'Файл загружен. Загружено товаров {len(new_products)}/{len(products)}\n'
                                       f'Создано новых категорий - {len(new_categories)}. Не забудьте проставить им цены')
+            if was_added_early:
+                messages.error(request, f'Товары со штрихкодами {", ".join(was_added_early)} были загружены ранее')
             return redirect('products_catalog')
         else:
             messages.error(request, 'Файл не загружен')
@@ -499,7 +504,7 @@ def employees_catalog(request):
 
 class CreateEmployee(CustomStr, CreateView):
     model = Employees
-    fields = ['name', 'barcode']
+    fields = ['name', 'barcode', 'status']
     success_url = reverse_lazy('employees_catalog')
 
     def form_valid(self, form):
@@ -515,7 +520,7 @@ class CreateEmployee(CustomStr, CreateView):
 
 class EditEmployee(CustomStr, UpdateView):
     model = Employees
-    fields = ['name', 'barcode']
+    fields = ['name', 'barcode', 'status']
     success_url = reverse_lazy('employees_catalog')
     template_name_suffix = '_edit_form'
 

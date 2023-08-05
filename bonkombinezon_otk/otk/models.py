@@ -10,6 +10,7 @@ class Employees(CustomStr, models.Model):
     name = models.CharField(max_length=255, verbose_name='Фамилия Имя Отчество')
     barcode = models.CharField(max_length=128, verbose_name='Штрихкод')
     schedule = models.JSONField(verbose_name='График работы', blank=True, null=True)
+    status = models.BooleanField(verbose_name='Статус', default=True)
 
     class Meta:
         verbose_name = 'Сотрудник'
@@ -31,7 +32,7 @@ class ProductCategories(CustomStr, models.Model):
 
 class Products(CustomStr, models.Model):
     name = models.CharField(max_length=255, verbose_name='Название изделия')
-    barcode = models.CharField(max_length=128, verbose_name='Штрихкод изделия')
+    barcode = models.CharField(max_length=128, verbose_name='Штрихкод изделия', unique=True)
     category = models.ForeignKey(ProductCategories, on_delete=models.CASCADE, related_name='products',
                                  verbose_name='Группа товаров')
 
